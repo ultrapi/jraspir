@@ -13,8 +13,10 @@ import java.io.InputStreamReader;
 public class RaspirSender {
 	
 	private File execFile;
+	private int gpioPin;
 	
-	public RaspirSender() {
+	public RaspirSender(int gpioPin) {
+		this.gpioPin=gpioPin;
 		execFile=new File("./raspir");		
 	}
 	
@@ -25,8 +27,7 @@ public class RaspirSender {
 		if (!execFile.canExecute()) throw new Exception("Not an executable file \""+execFile+"\"");
 
 		//Start exec
-		int gpioOutPin = 21;
-		String command = "sudo "+execFile.toString()+" -p "+gpioOutPin+" -h "+hex; //+" -o out.txt";
+		String command = "sudo "+execFile.toString()+" -p "+gpioPin+" -h "+hex; //+" -o out.txt";
 		System.out.println("STARTING: "+command);
 		Process process = Runtime.getRuntime().exec(command);
 		InputStream ins = process.getInputStream();
@@ -46,11 +47,13 @@ public class RaspirSender {
 				while((line = buff.readLine()) != null)
 				    System.out.print(line);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			System.out.println("monitorStream done");
 		});
 		task2.start();
+	}
+	
+	public void setGpioPin(int pin) {
+		gpioPin=pin;
 	}
 }

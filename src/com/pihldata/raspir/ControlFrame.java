@@ -11,9 +11,13 @@ import com.pihldata.raspir.mitsubishi.MitsubishiControlPanel;
 
 public class ControlFrame extends JFrame {
 	
-	private RaspirSender raspirSender=new RaspirSender();
+	private RaspirSender raspirSender;
 	
 	public ControlFrame() {
+		
+		int gpioOutPin = 21;
+		raspirSender=new RaspirSender(gpioOutPin);
+		
 		MitsubishiControlPanel mPanel = new MitsubishiControlPanel();
 		setTitle("Mitsubishi");
 		getContentPane().add(mPanel);
