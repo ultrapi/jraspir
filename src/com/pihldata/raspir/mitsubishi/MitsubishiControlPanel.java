@@ -100,9 +100,7 @@ public class MitsubishiControlPanel extends JPanel {
 		Command c = new Command();
 		c.t= (Integer)temperatureComboBox.getSelectedItem();
 		c.powerOn=chckbxOn.isSelected();
-		
-		//System.out.println(c);
-		
+
 		for (ActionListener actionListener : listeners) {
 			actionListener.actionPerformed(new ActionEvent(c,0,""));
 		}

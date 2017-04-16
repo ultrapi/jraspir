@@ -41,10 +41,7 @@ public class ControlFrame extends JFrame {
 		CommandGenerator cg = new CommandGenerator();
 		try {
 			String hex = cg.getHex(command);
-			System.out.println("Sending hex="+hex);
-			
-			raspirSender.sendHexData(hex);
-			
+			raspirSender.sendHexData(hex);			
 		} catch (Exception e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(this, "Error: "+e.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
