@@ -20,8 +20,9 @@ public class CommandGenerator {
 		
 		String hexCommand=h10HexCommand;
 		int[] bytes = getBytes(hexCommand);
-		System.out.println(getHex(bytes));
-		printBinary(bytes);
+		
+		//System.out.println(getHex(bytes));
+		//printBinary(bytes);
 		
 		//On/off
 		bytes[ON_OFF_INDEX]=setBit(bytes[ON_OFF_INDEX],ON_OFF_BIT, command.powerOn);
@@ -41,10 +42,10 @@ public class CommandGenerator {
 		for (int i = 0; i < bytes.length-1; i++) crc+=bytes[i];
 		bytes[CRC_INDEX]=crc%256;
 		
-		System.out.println(getHex(bytes));
+		//System.out.println(getHex(bytes));
 		
-		Command c = getCommand(getHex(bytes));
-		System.out.println(c);
+		//Command c = getCommand(getHex(bytes));
+		//System.out.println(c);
 		
 		return getHex(bytes);
 	}
