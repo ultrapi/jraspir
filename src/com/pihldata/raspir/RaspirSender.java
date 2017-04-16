@@ -15,19 +15,20 @@ public class RaspirSender {
 	private File execFile;
 	
 	public RaspirSender() {
-		execFile=new File("raspir");		
+		execFile=new File("./raspir");		
 	}
 	
 	public void sendHexData(String hex) throws Exception {
+		//Check exec
 		if (!execFile.exists()) throw new Exception("Cannot find file \""+execFile+"\"");
 		if (!execFile.isFile()) throw new Exception("Not a file \""+execFile+"\"");
 		if (!execFile.canExecute()) throw new Exception("Not an executable file \""+execFile+"\"");
 
-		
-		String command = "sudo "+execFile.toString()+" -h "+hex+" -o out.txt";
+		//Start exec
+		int gpioOutPin = 21;
+		String command = "sudo "+execFile.toString()+" -p "+gpioOutPin+" -h "+hex; //+" -o out.txt";
 		System.out.println("STARTING: "+command);
 		Process process = Runtime.getRuntime().exec(command);
-		System.out.println("process: "+process);
 		InputStream ins = process.getInputStream();
 		InputStream errs = process.getErrorStream();
 		
