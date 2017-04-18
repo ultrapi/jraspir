@@ -1,27 +1,24 @@
 package com.pihldata.raspir.mitsubishi;
 
-import javax.swing.JPanel;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.HashSet;
+import java.util.List;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+
+import com.pihldata.raspir.RemoteControlPanel;
+
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import javax.swing.JButton;
 
-public class MitsubishiControlPanel extends JPanel {
+public class MitsubishiControlPanel extends RemoteControlPanel {
 	
 	private JComboBox<Integer> temperatureComboBox;
 	private JCheckBox chckbxOn;
 	private JCheckBox chckbxAutoSend;
-	
-	private HashSet<ActionListener> listeners=new HashSet<>();
 	
 	public MitsubishiControlPanel() { 
 		GridBagLayout gridBagLayout = new GridBagLayout();
@@ -96,22 +93,23 @@ public class MitsubishiControlPanel extends JPanel {
 		if (chckbxAutoSend.isSelected()) update();
 	}
 	
-	private void update() {		
-		Command c = new Command();
-		c.t= (Integer)temperatureComboBox.getSelectedItem();
-		c.powerOn=chckbxOn.isSelected();
-
-		for (ActionListener actionListener : listeners) {
-			actionListener.actionPerformed(new ActionEvent(c,0,""));
-		}
-	}
 	
-	public void addListener(ActionListener listener) {
-		listeners.add(listener);
+	private Command getCommand() {
+		return new Command() {{
+			t= (Integer)temperatureComboBox.getSelectedItem();
+			powerOn=chckbxOn.isSelected();
+		}};
 	}
-	
+		
 	public void setCommand(Command c) {
 		temperatureComboBox.setSelectedItem(c.t);
 		chckbxOn.setSelected(c.powerOn);
+	}
+	
+	@Override
+	public List<int[]> getDataSequence() throws Exception {
+		CommandGenerator cg = new CommandGenerator();
+		String hex = cg.getHex(getCommand());
+		return cg.getDataSequence(hex);
 	}
 }

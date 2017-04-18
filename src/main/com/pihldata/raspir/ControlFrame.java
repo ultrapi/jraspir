@@ -7,7 +7,6 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import com.pihldata.raspir.mitsubishi.Command;
-import com.pihldata.raspir.mitsubishi.CommandGenerator;
 import com.pihldata.raspir.mitsubishi.MitsubishiControlPanel;
 
 public class ControlFrame extends JFrame {
@@ -19,38 +18,33 @@ public class ControlFrame extends JFrame {
 		int gpioOutPin = 21;
 		raspirSender=new RaspirSender(gpioOutPin);
 		
-		MitsubishiControlPanel mPanel = new MitsubishiControlPanel();
 		setTitle("Mitsubishi");
-		getContentPane().add(mPanel);
 
+		RemoteControlPanel mPanel = getMitsubishiControlPanel();
 		
+		mPanel.addListener(a->newCommand(a));
+	}
+
+	private RemoteControlPanel getMitsubishiControlPanel() {
+		MitsubishiControlPanel mPanel = new MitsubishiControlPanel();
+		getContentPane().add(mPanel);
 		Command defaultCommand = new Command() {{
 			t=21;
 			powerOn=true;
 			//left_vane=VANE.VANE1;
 		}};
 		mPanel.setCommand(defaultCommand);
-		
-		mPanel.addListener(a->newCommand(a));
+		return mPanel;
 	}
 
 	private void newCommand(ActionEvent a) {
 		
-		if (!(a.getSource() instanceof Command)) return;
-		Command command = (Command)a.getSource();
-		
-		CommandGenerator cg = new CommandGenerator();
+		if (!(a.getSource() instanceof RemoteControlPanel)) return;
+		RemoteControlPanel panel = (RemoteControlPanel)a.getSource();
+				
 		try {
-			String hex = cg.getHex(command);
-
-			boolean useHex = false;
-			if (useHex) {
-				raspirSender.sendHexData(hex);			
-			} else {
-				List<int[]> ds = cg.getDataSequence(hex);
-				raspirSender.sendSequence(ds);	
-			}
-			
+			List<int[]> ds = panel.getDataSequence();
+			raspirSender.sendSequence(ds);	
 		} catch (Exception e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(this, "Error: "+e.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
