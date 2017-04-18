@@ -1,5 +1,8 @@
 package com.pihldata.raspir.mitsubishi;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CommandGenerator {
 	
 	private final int ON_OFF_INDEX=5;
@@ -91,4 +94,67 @@ public class CommandGenerator {
 		}
 		return r;
 	}
+	
+	//Add pulses, return consumed samples of sampleTime
+	//sampleTime first point is already set as starting point and samples is added after this
+	List<int[]> getSample(int startTime, int hTime, int lTime, int pulseHLength, int pulseLLength) {
+		List<int[]> result = new ArrayList<>();
+		int t = startTime;
+		while (t+hTime+lTime<=startTime+pulseHLength) {   
+			result.add(new int[] {t,1});
+			result.add(new int[] {t+hTime,0});
+			t+=hTime+lTime;
+		}
+		return result;
+	}
+	
+	/**
+	 * Get sequence of timed switch on/off to send IR command 
+	 * @param hexCommand
+	 * @return Each element is a pair of time in microseconds, and the state on/off (1=on 0=off)
+	 * @throws Exception
+	 */
+	public List<int[]> getDataSequence(String hexCommand) throws Exception {
+		
+		int[] bytes = getBytes(hexCommand);
+		
+		//Timing of pulses [µs], measured
+		int hTime=15; //Time for short high pulse
+		int lTime=11; //Time for short low pulse
+		int initOffsetTime=700;
+		int initPulseHLength=3344;
+		int initPulseLLength=1688;
+		int bitHLength=428; //Normal 1 bit high time
+		int oneBitLLength=1268; //Normal 1 bit low time
+		int zeroBitLLength=430; //Normal 0 bit low time
+		int repeatePause=11354;
+		
+		List<int[]> result = new ArrayList<>();
+		result.add(new int[]{0,0}); //Starting point
+		int t=initOffsetTime;
+		for (int repeatIndex=0;repeatIndex<2;repeatIndex++) {
+			//Start pulse
+			result.addAll(getSample(t, hTime, lTime, initPulseHLength, initPulseLLength));
+			int pulseCount = (initPulseHLength)/(hTime+lTime);
+			t+=pulseCount*(hTime+lTime)+initPulseLLength;
+			for (int byteIndex=0;byteIndex<bytes.length;byteIndex++) {
+				for (int bitIndex=0;bitIndex<8;bitIndex++) {
+					boolean bitVal = 0<((((byte)bytes[byteIndex]) >> bitIndex)  & 1);
+					int lLength=bitVal?oneBitLLength:zeroBitLLength;
+					result.addAll(getSample(t, hTime, lTime, bitHLength, lLength));
+					pulseCount = (bitHLength)/(hTime+lTime);
+					t+=pulseCount*(hTime+lTime)+lLength;
+					//t+=bitHLength+lLength;
+				}
+			}
+			//Stop bit
+			result.addAll(getSample(t, hTime, lTime, bitHLength, 0));
+			pulseCount = (bitHLength)/(hTime+lTime);
+			t+=pulseCount*(hTime+lTime)+repeatePause;
+			//Repeat pause
+			result.addAll(getSample(t, hTime, lTime, 0, repeatePause));
+		}
+		
+		return result;
+	}	
 }

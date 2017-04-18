@@ -1,6 +1,7 @@
 package com.pihldata.raspir;
 
 import java.awt.event.ActionEvent;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -41,7 +42,15 @@ public class ControlFrame extends JFrame {
 		CommandGenerator cg = new CommandGenerator();
 		try {
 			String hex = cg.getHex(command);
-			raspirSender.sendHexData(hex);			
+
+			boolean useHex = false;
+			if (useHex) {
+				raspirSender.sendHexData(hex);			
+			} else {
+				List<int[]> ds = cg.getDataSequence(hex);
+				raspirSender.sendSequence(ds);	
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(this, "Error: "+e.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
